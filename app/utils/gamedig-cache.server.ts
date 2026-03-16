@@ -57,7 +57,10 @@ export async function cachedGamedigQuery(
     type: "counterstrike2",
     host,
     port,
-    requestRules: options?.requestRules ?? false
+    requestRules: options?.requestRules ?? false,
+    maxRetries: 0,
+    socketTimeout: 1000,
+    attemptTimeout: 1500
   });
   setCached(host, port, result);
   return result;
