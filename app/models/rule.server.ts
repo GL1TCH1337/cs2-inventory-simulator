@@ -114,6 +114,10 @@ export class Rule<RuleName extends string, RuleValue> {
     }
   }
 
+  public parseValue(str: string): RuleValue {
+    return this.toValue(str);
+  }
+
   async register() {
     if ((await prisma.rule.count({ where: { name: this.name } })) === 0) {
       await this.set(this.defaultValue);
@@ -542,3 +546,64 @@ export const craftAllowImportInspectLink = new Rule({
   type: "boolean",
   defaultValue: true
 });
+
+export async function getRulesValues<T extends Record<string, Rule<string, unknown>>>(
+  rules: T,
+  userId?: string
+): Promise<{
+  [K in keyof T]: T[K]["defaultValue"];
+}> {
+  const entries = Object.entries(rules);
+  const names = entries.map(([, rule]) => rule.name);
+
+  const baseRules = await prisma.rule.findMany({
+    where: { name: { in: names } },
+    select: { name: true, value: true }
+  });
+  const baseMap = new Map(baseRules.map((rule) => [rule.name, rule.value]));
+
+  let userMap = new Map<string, string>();
+  let groupMap = new Map<string, string>();
+
+  if (userId !== undefined) {
+    const userRules = await prisma.userRule.findMany({
+      where: { userId, name: { in: names } },
+      select: { name: true, value: true }
+    });
+    userMap = new Map(userRules.map((rule) => [rule.name, rule.value]));
+
+    const userGroup = await prisma.userGroup.findFirst({
+      select: {
+        group: {
+          select: {
+            overwrites: {
+              select: { name: true, value: true },
+              where: { name: { in: names } }
+            }
+          }
+        }
+      },
+      where: { userId },
+      orderBy: {
+        group: { priority: "desc" }
+      }
+    });
+    const overwrites = userGroup?.group?.overwrites ?? [];
+    groupMap = new Map(overwrites.map((rule) => [rule.name, rule.value]));
+  }
+
+  return Object.fromEntries(
+    entries.map(([name, rule]) => {
+      const rawValue =
+        (userId !== undefined ? userMap.get(rule.name) : undefined) ??
+        (userId !== undefined ? groupMap.get(rule.name) : undefined) ??
+        baseMap.get(rule.name);
+      return [
+        name,
+        rawValue !== undefined ? rule.parseValue(rawValue) : rule.defaultValue
+      ];
+    })
+  ) as {
+    [K in keyof T]: T[K]["defaultValue"];
+  };
+}

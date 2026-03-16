@@ -60,7 +60,8 @@ import {
   inventoryItemEquipHideType,
   inventoryMaxItems,
   inventoryStorageUnitMaxItems,
-  Rule
+  Rule,
+  getRulesValues
 } from "./rule.server";
 
 export async function setupRules() {
@@ -75,14 +76,7 @@ export async function getRules<T extends Record<string, Rule<string, unknown>>>(
 ): Promise<{
   [K in keyof T]: T[K]["defaultValue"];
 }> {
-  return Object.fromEntries(
-    await Promise.all(
-      Object.entries(rules).map(async ([name, rule]) => [
-        name,
-        userId !== undefined ? await rule.for(userId).get() : await rule.get()
-      ])
-    )
-  );
+  return await getRulesValues(rules, userId);
 }
 
 export async function getClientRules(userId?: string) {
