@@ -5,14 +5,15 @@
 
 import { NavLink, Outlet } from "react-router";
 import { isAdmin, requireUser } from "~/auth.server";
-import { forbidden } from "~/responses.server";
 import { middleware } from "~/http.server";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await middleware(request);
   await requireUser(request);
-  if (!(await isAdmin(request))) throw forbidden;
+  if (!(await isAdmin(request))) {
+    throw new Response(null, { status: 403 });
+  }
   return {};
 }
 
