@@ -22,7 +22,8 @@ const NAV = [
   { to: "/admin/vips", end: false, label: "VIP" },
   { to: "/admin/bans", end: false, label: "Bans" },
   { to: "/admin/mutes", end: false, label: "Mutes" },
-  { to: "/admin/servers", end: false, label: "Sunucular" }
+  { to: "/admin/servers", end: false, label: "Sunucular" },
+  { to: "/admin/settings", end: false, label: "Ayarlar" }
 ] as const;
 
 export default function AdminLayout() {

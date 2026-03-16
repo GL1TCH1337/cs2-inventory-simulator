@@ -17,7 +17,8 @@ const SECTIONS = [
   { to: "/admin/vips", label: "VIP", description: "VIP kullanıcılarını listele, ekle veya kaldır." },
   { to: "/admin/bans", label: "Bans", description: "Banları yönet: ekle veya kaldır." },
   { to: "/admin/mutes", label: "Mutes", description: "Susturmaları yönet: ekle veya kaldır." },
-  { to: "/admin/servers", label: "Sunucular", description: "Sunucu listesini düzenle (ana sayfa)." }
+  { to: "/admin/servers", label: "Sunucular", description: "Sunucu listesini düzenle (ana sayfa)." },
+  { to: "/admin/settings", label: "Ayarlar", description: "Popup ve bakım modu ayarları." }
 ] as const;
 
 export default function AdminIndex() {

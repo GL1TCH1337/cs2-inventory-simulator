@@ -53,7 +53,9 @@ export default function AdminVips() {
 
   return (
     <div className="m-auto max-w-4xl px-4 py-6">
-      <h1 className="font-display text-xl font-semibold text-white mb-4">VIP</h1>
+      <h1 className="font-display text-xl font-semibold text-white mb-4">
+        VIP <span className="text-sm font-normal text-stone-400 ml-2">({vips.length} toplam)</span>
+      </h1>
       {actionError && (
         <p className="mb-4 text-sm text-red-400">{actionError}</p>
       )}
@@ -137,7 +139,14 @@ export default function AdminVips() {
                     <td className="px-4 py-3 font-medium text-white">{row.name}</td>
                     <td className="px-4 py-3 font-mono text-xs text-stone-400">{row.sid}</td>
                     <td className="px-4 py-3">{row.group}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-stone-400">{row.expires || "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-stone-400">
+                      {row.expires === 0
+                        ? "Süresiz"
+                        : new Date(row.expires * 1000).toLocaleString("tr-TR", {
+                            dateStyle: "medium",
+                            timeStyle: "short"
+                          })}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <fetcher.Form method="post" className="inline">
                         <input type="hidden" name="intent" value="remove-vip" />

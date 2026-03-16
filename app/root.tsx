@@ -15,7 +15,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData
+  useLoaderData,
+  useLocation
 } from "react-router";
 
 import { findRequestUser } from "./auth.server";
@@ -47,6 +48,8 @@ import { getSeoLinks, getSeoMeta } from "./root-seo";
 import { getSession } from "./session.server";
 import styles from "./tailwind.css?url";
 import { nonEmptyString } from "./utils/misc";
+import { getSiteSettings } from "./admin/settings.server";
+import { MaintenanceScreen } from "./components/maintenance-screen";
 
 const bodyFontUrl =
   "https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,62.5..100,400..800;1,62.5..100,400..800&display=swap";
@@ -82,6 +85,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const { origin: appUrl, host: appSiteName } = new URL(
     await steamCallbackUrl.get()
   );
+  const siteSettings = await getSiteSettings();
   return data({
     rules: {
       ...(await getClientRules(user?.id)),
@@ -95,13 +99,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ...(await getLanguage(session, ipCountry)),
       ...(await getToggleable(session))
     },
+    siteSettings,
     user
   });
 }
 
 export default function App() {
   const appProps = useLoaderData<typeof loader>();
+  const location = useLocation();
   const { footer, header, inventory } = useRootLayout();
+  const showMaintenance =
+    appProps.siteSettings.maintenance.enabled &&
+    !location.pathname.startsWith("/admin");
 
   return (
     <AppProvider {...appProps}>
@@ -132,15 +141,21 @@ export default function App() {
           <Background />
           <Console />
           <SyncWarn />
-          {(header || inventory) && (
-            <ItemSelectorProvider>
-              {header && <Header showInventoryFilter={inventory} />}
-              {inventory && <Inventory />}
-            </ItemSelectorProvider>
+          {showMaintenance ? (
+            <MaintenanceScreen settings={appProps.siteSettings.maintenance} />
+          ) : (
+            <>
+              {(header || inventory) && (
+                <ItemSelectorProvider>
+                  {header && <Header showInventoryFilter={inventory} />}
+                  {inventory && <Inventory />}
+                </ItemSelectorProvider>
+              )}
+              <Outlet />
+              {footer && <Footer />}
+              <SyncIndicator />
+            </>
           )}
-          <Outlet />
-          {footer && <Footer />}
-          <SyncIndicator />
           <ScrollRestoration />
 
           <CloudflareAnalyticsScript

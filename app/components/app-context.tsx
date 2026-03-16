@@ -68,6 +68,10 @@ export function usePreferences() {
   return useAppContext().preferences;
 }
 
+export function useSiteSettings() {
+  return useAppContext().siteSettings;
+}
+
 export function useInventory() {
   const { inventory, setInventory } = useAppContext();
   return [inventory, setInventory] as const;
@@ -89,6 +93,7 @@ export function AppProvider({
   children,
   preferences,
   rules,
+  siteSettings,
   user
 }: Omit<
   NonNullable<ContextType<typeof AppContext>>,
@@ -188,6 +193,7 @@ export function AppProvider({
         translation: translation,
         preferences,
         rules,
+        siteSettings,
         setInventory,
         user
       }}

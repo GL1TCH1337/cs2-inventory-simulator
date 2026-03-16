@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import { middleware } from "~/http.server";
 import { cachedGamedigQuery } from "~/utils/gamedig-cache.server";
@@ -15,6 +15,8 @@ import {
   type ServerDetailPlayer
 } from "~/components/server-detail-modal";
 import { ServerCard } from "~/components/server-card";
+import { useSiteSettings } from "~/components/app-context";
+import { useStorageState } from "~/components/hooks/use-storage-state";
 import type { Route } from "./+types/_index";
 
 export const meta = getMetaTitle();
@@ -106,6 +108,23 @@ export default function Index() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [selectedServer, setSelectedServer] = useState<SelectedServer>(null);
   const fetcher = useFetcher<{ players?: ServerDetailPlayer[] }>();
+  const { popup } = useSiteSettings();
+  const [popupSeen, setPopupSeen] = useStorageState("sitePopupSeen", "");
+  const popupSignature = useMemo(
+    () =>
+      JSON.stringify({
+        title: popup.title,
+        message: popup.message,
+        ctaLabel: popup.ctaLabel,
+        ctaUrl: popup.ctaUrl
+      }),
+    [popup.ctaLabel, popup.ctaUrl, popup.message, popup.title]
+  );
+  const popupContent =
+    popup.title.trim() || popup.message.trim() || popup.ctaLabel.trim();
+  const showPopup =
+    popup.enabled && popupContent.length > 0 && popupSeen !== popupSignature;
+  const closePopup = () => setPopupSeen(popupSignature);
 
   useEffect(() => {
     if (!selectedServer) return;
@@ -280,6 +299,38 @@ export default function Index() {
             void navigator.clipboard.writeText(ip);
           }}
         />
+      </Modal>
+      <Modal hidden={!showPopup} blur fixed onClose={closePopup}>
+        <div className="w-[480px] max-w-[92vw] p-6">
+          <h2 className="font-display text-xl font-semibold text-white">
+            {popup.title || "Duyuru"}
+          </h2>
+          {popup.message && (
+            <p className="mt-3 text-sm leading-relaxed text-neutral-300 whitespace-pre-line">
+              {popup.message}
+            </p>
+          )}
+          <div className="mt-6 flex flex-wrap justify-end gap-2">
+            {popup.ctaUrl && popup.ctaLabel && (
+              <a
+                href={popup.ctaUrl}
+                target={popup.ctaUrl.startsWith("/") ? "_self" : "_blank"}
+                rel="noreferrer"
+                onClick={closePopup}
+                className="rounded bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+              >
+                {popup.ctaLabel}
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={closePopup}
+              className="rounded bg-stone-700 px-4 py-2 text-sm font-medium text-white hover:bg-stone-600"
+            >
+              Kapat
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
