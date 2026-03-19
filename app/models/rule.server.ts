@@ -469,6 +469,12 @@ export const craftAllowKeychainY = new Rule({
   defaultValue: true
 });
 
+export const craftAllowKeychainZ = new Rule({
+  name: "craftAllowKeychainZ",
+  type: "boolean",
+  defaultValue: true
+});
+
 export const editAllowNametag = new Rule({
   name: "editAllowNametag",
   type: "boolean",
@@ -561,6 +567,12 @@ export const editAllowKeychainX = new Rule({
 
 export const editAllowKeychainY = new Rule({
   name: "editAllowKeychainY",
+  type: "boolean",
+  defaultValue: true
+});
+
+export const editAllowKeychainZ = new Rule({
+  name: "editAllowKeychainZ",
   type: "boolean",
   defaultValue: true
 });
