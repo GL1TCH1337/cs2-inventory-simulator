@@ -9,6 +9,15 @@ import { badRequest, conflict } from "~/responses.server";
 import { parseInventory } from "~/utils/inventory";
 import { inventoryMaxItems, inventoryStorageUnitMaxItems } from "./rule.server";
 
+function isMissingColumnError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2022"
+  );
+}
+
 export async function getUserInventory(userId: string) {
   return (
     (
@@ -21,14 +30,23 @@ export async function getUserInventory(userId: string) {
 }
 
 export async function getUserInventoryVersion(userId: string) {
-  return (
-    (
-      await prisma.user.findFirst({
-        select: { inventoryVersion: true },
-        where: { id: userId }
-      })
-    )?.inventoryVersion ?? null
-  );
+  try {
+    return (
+      (
+        await prisma.user.findFirst({
+          select: { inventoryVersion: true },
+          where: { id: userId }
+        })
+      )?.inventoryVersion ?? null
+    );
+  } catch (error) {
+    // Backward compatibility for deployments where the inventoryVersion column
+    // has not been migrated yet.
+    if (isMissingColumnError(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function upsertUser(user: {
