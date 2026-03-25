@@ -3,11 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useMemo, useState } from "react";
-import { useFetcher, useLoaderData } from "react-router";
-import { middleware } from "~/http.server";
-import { cachedGamedigQuery } from "~/utils/gamedig-cache.server";
-import { getServerListForDisplay } from "~/admin/servers.server";
+import { middleware } from "~/middleware.server";
 import { getMetaTitle } from "~/root-meta";
 import { Modal } from "~/components/modal";
 import {

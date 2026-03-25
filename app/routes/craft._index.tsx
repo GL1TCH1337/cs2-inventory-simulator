@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { faLink } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDownLong } from "@fortawesome/free-solid-svg-icons";
 import { CS2BaseInventoryItem, CS2EconomyItem } from "@ianlucas/cs2-lib";
 import clsx from "clsx";
 import lzstring from "lz-string";
@@ -23,12 +23,15 @@ import { ItemEditorAttributes } from "~/components/item-editor";
 import { ItemPicker } from "~/components/item-picker";
 import { Modal, ModalHeader, ModalNav } from "~/components/modal";
 import { SyncAction } from "~/data/sync";
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 import { getUserBasicData } from "~/models/user.server";
 import { getMetaTitle } from "~/root-meta";
 import { isItemCountable } from "~/utils/economy";
-import { createFakeInventoryItemFromBase } from "~/utils/inventory";
-import { deleteEmptyProps, tryOrDefault } from "~/utils/misc";
+import {
+  createFakeInventoryItemFromBase,
+  editInventoryItem
+} from "~/utils/inventory";
+import { tryOrDefault } from "~/utils/misc";
 import { range } from "~/utils/number";
 import { baseInventoryItemProps } from "~/utils/shapes";
 import { playSound } from "~/utils/sound";
@@ -104,38 +107,29 @@ export default function Craft() {
 
   useLockScroll();
 
-  function handleSubmit({
-    quantity,
-    statTrak,
-    ...attributes
-  }: ItemEditorAttributes) {
+  function handleSubmit({ quantity, ...attributes }: ItemEditorAttributes) {
     if (isSubmitting || item === undefined) {
       return;
     }
+
     playSound("inventory_new_item_accept");
     setIsSubmitting(true);
 
-    const inventoryItem = {
-      id: item.id,
-      statTrak: statTrak ? (0 as const) : undefined,
-      ...attributes
-    } satisfies CS2BaseInventoryItem;
-
     if (isEditing) {
-      deleteEmptyProps(inventoryItem, ["keychains", "stickers"]);
-      setInventory(
-        inventory.edit(uid, {
-          ...inventoryItem,
-          statTrak: statTrak ? (inventory.get(uid).statTrak ?? 0) : undefined
-        })
-      );
+      setInventory(editInventoryItem(inventory, uid, attributes));
       sync({
         type: SyncAction.Edit,
         uid,
-        attributes: inventoryItem
+        attributes
       });
       return navigate("/");
     }
+
+    const inventoryItem = {
+      ...attributes,
+      id: item.id,
+      statTrak: attributes.statTrak ? (0 as const) : undefined
+    } satisfies CS2BaseInventoryItem;
 
     range(isItemCountable(item) ? quantity : 1).forEach(() => {
       setInventory(inventory.add(inventoryItem));
@@ -191,7 +185,7 @@ export default function Craft() {
           <ModalNav
             items={[
               craftAllowImportInspectLink && {
-                icon: faLink,
+                icon: faArrowDownLong,
                 isActive: isImportFromInspectLink,
                 label: translate("CraftImportNavLabel"),
                 onClick: handleImportFromInspectLinkOpen
