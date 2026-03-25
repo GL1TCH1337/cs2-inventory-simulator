@@ -7,7 +7,7 @@ import { RulesPageContent } from "~/components/rules-page-content";
 import { serverRulesSections } from "~/data/server-rules";
 import { getMetaTitle } from "~/root-meta";
 import type { Route } from "./+types/rules._index";
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 
 export const meta = getMetaTitle("HeaderRulesLabel");
 

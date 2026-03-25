@@ -5,7 +5,7 @@
 
 import { getMetaTitle } from "~/root-meta";
 import type { Route } from "./+types/inventory._index";
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 
 export const meta = getMetaTitle("HeaderInventoryLabel");
 

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 import { cachedGamedigQuery } from "~/utils/gamedig-cache.server";
 import type { Route } from "./+types/api.servers.players._index";
 

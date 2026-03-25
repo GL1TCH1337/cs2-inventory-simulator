@@ -5,7 +5,7 @@
 
 import { NavLink, Outlet } from "react-router";
 import { isAdmin, requireUser } from "~/auth.server";
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request }: Route.LoaderArgs) {

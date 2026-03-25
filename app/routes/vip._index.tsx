@@ -12,7 +12,7 @@ import {
   PAYTR_MERCHANT_KEY,
   PAYTR_MERCHANT_SALT
 } from "~/env.server";
-import { middleware } from "~/http.server";
+import { middleware } from "~/middleware.server";
 import { getMetaTitle } from "~/root-meta";
 import type { Route } from "./+types/vip._index";
 
