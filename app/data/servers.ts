@@ -13,6 +13,5 @@ export interface ServerEntry {
 /** List of CS2 servers to query via gamedig. Port optional; gamedig uses game default (27015) if omitted. */
 export const SERVER_LIST: ServerEntry[] = [
   { host: "213.146.165.208", port: 27015, gamemode: "retake" },
-  { host: "213.146.165.57", port: 27015, gamemode: "retake" },
-  { host: "213.146.165.58", port: 27015, gamemode: "retake" }
+  { host: "213.146.165.208", port: 27023, gamemode: "retake" }
 ];
